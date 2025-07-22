@@ -1,0 +1,6 @@
+@SifenApiTest_HostAddress = http://localhost:5063
+
+GET {{SifenApiTest_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

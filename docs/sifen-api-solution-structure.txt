@@ -1,0 +1,128 @@
+📁 SifenApi/
+├── 📁 src/
+│   ├── 📁 SifenApi.Domain/
+│   │   ├── 📁 Entities/
+│   │   │   ├── DocumentoElectronico.cs
+│   │   │   ├── Contribuyente.cs
+│   │   │   ├── Cliente.cs
+│   │   │   ├── Item.cs
+│   │   │   ├── Timbrado.cs
+│   │   │   └── EventoDocumento.cs
+│   │   ├── 📁 ValueObjects/
+│   │   │   ├── Cdc.cs
+│   │   │   ├── Ruc.cs
+│   │   │   └── NumeroDocumento.cs
+│   │   ├── 📁 Enums/
+│   │   │   ├── TipoDocumento.cs
+│   │   │   ├── TipoEmision.cs
+│   │   │   └── EstadoDocumento.cs
+│   │   └── 📁 Interfaces/
+│   │       ├── IDocumentoElectronicoRepository.cs
+│   │       ├── IUnitOfWork.cs
+│   │       └── IEventStore.cs
+│   │
+│   ├── 📁 SifenApi.Application/
+│   │   ├── 📁 Common/
+│   │   │   ├── 📁 Interfaces/
+│   │   │   │   ├── IXmlGenerator.cs
+│   │   │   │   ├── IXmlSigner.cs
+│   │   │   │   ├── IQrGenerator.cs
+│   │   │   │   ├── ISifenClient.cs
+│   │   │   │   └── IKudeGenerator.cs
+│   │   │   ├── 📁 Exceptions/
+│   │   │   │   ├── ValidationException.cs
+│   │   │   │   └── SifenException.cs
+│   │   │   └── 📁 Behaviors/
+│   │   │       ├── ValidationBehavior.cs
+│   │   │       └── LoggingBehavior.cs
+│   │   ├── 📁 DocumentosElectronicos/
+│   │   │   ├── 📁 Commands/
+│   │   │   │   ├── CreateFacturaCommand.cs
+│   │   │   │   ├── CreateNotaCreditoCommand.cs
+│   │   │   │   ├── CreateNotaDebitoCommand.cs
+│   │   │   │   ├── CreateNotaRemisionCommand.cs
+│   │   │   │   └── CreateAutoFacturaCommand.cs
+│   │   │   ├── 📁 Queries/
+│   │   │   │   ├── GetDocumentoByIdQuery.cs
+│   │   │   │   ├── GetDocumentosByCdcQuery.cs
+│   │   │   │   └── GetDocumentosQuery.cs
+│   │   │   └── 📁 Handlers/
+│   │   │       ├── CreateFacturaHandler.cs
+│   │   │       └── GetDocumentoByIdHandler.cs
+│   │   ├── 📁 Eventos/
+│   │   │   ├── 📁 Commands/
+│   │   │   │   ├── CancelarDocumentoCommand.cs
+│   │   │   │   ├── InutilizarRangoCommand.cs
+│   │   │   │   └── RegistrarEventoCommand.cs
+│   │   │   └── 📁 Handlers/
+│   │   │       └── CancelarDocumentoHandler.cs
+│   │   ├── 📁 DTOs/
+│   │   │   ├── FacturaDto.cs
+│   │   │   ├── ClienteDto.cs
+│   │   │   ├── ItemDto.cs
+│   │   │   └── ResponseDto.cs
+│   │   └── 📁 Validators/
+│   │       ├── FacturaValidator.cs
+│   │       └── ClienteValidator.cs
+│   │
+│   ├── 📁 SifenApi.Infrastructure/
+│   │   ├── 📁 Persistence/
+│   │   │   ├── 📁 Context/
+│   │   │   │   └── SifenDbContext.cs
+│   │   │   ├── 📁 Configurations/
+│   │   │   │   ├── DocumentoElectronicoConfiguration.cs
+│   │   │   │   └── ClienteConfiguration.cs
+│   │   │   ├── 📁 Repositories/
+│   │   │   │   ├── DocumentoElectronicoRepository.cs
+│   │   │   │   └── UnitOfWork.cs
+│   │   │   └── 📁 Migrations/
+│   │   ├── 📁 Services/
+│   │   │   ├── 📁 Xml/
+│   │   │   │   ├── XmlGenerator.cs
+│   │   │   │   └── XmlSigner.cs
+│   │   │   ├── 📁 Sifen/
+│   │   │   │   ├── SifenClient.cs
+│   │   │   │   └── SifenConfiguration.cs
+│   │   │   ├── 📁 Qr/
+│   │   │   │   └── QrGenerator.cs
+│   │   │   └── 📁 Kude/
+│   │   │       └── KudeGenerator.cs
+│   │   └── 📁 Security/
+│   │       └── CertificateManager.cs
+│   │
+│   └── 📁 SifenApi.WebApi/
+│       ├── 📁 Controllers/
+│       │   ├── 📁 V1/
+│       │   │   ├── FacturasController.cs
+│       │   │   ├── NotasCreditoController.cs
+│       │   │   ├── NotasDebitoController.cs
+│       │   │   ├── NotasRemisionController.cs
+│       │   │   ├── EventosController.cs
+│       │   │   └── ConsultasController.cs
+│       │   └── BaseApiController.cs
+│       ├── 📁 Middleware/
+│       │   ├── ExceptionHandlingMiddleware.cs
+│       │   ├── RequestLoggingMiddleware.cs
+│       │   └── RateLimitingMiddleware.cs
+│       ├── 📁 Filters/
+│       │   └── ApiKeyAuthFilter.cs
+│       ├── 📁 Extensions/
+│       │   ├── ServiceCollectionExtensions.cs
+│       │   └── ApplicationBuilderExtensions.cs
+│       ├── Program.cs
+│       └── appsettings.json
+│
+├── 📁 tests/
+│   ├── 📁 SifenApi.Domain.Tests/
+│   ├── 📁 SifenApi.Application.Tests/
+│   ├── 📁 SifenApi.Infrastructure.Tests/
+│   └── 📁 SifenApi.IntegrationTests/
+│
+├── 📁 docs/
+│   ├── API.md
+│   └── DEPLOYMENT.md
+│
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+└── SifenApi.sln
