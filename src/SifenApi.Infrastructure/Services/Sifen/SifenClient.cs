@@ -20,6 +20,8 @@ public class SifenClient : ISifenClient
 
     private readonly string _urlTest;
     private readonly string _urlProd;
+    private readonly string _certificatePath;
+    private readonly string _certificatePassword;
 
     public SifenClient(
         HttpClient httpClient,
@@ -34,13 +36,13 @@ public class SifenClient : ISifenClient
 
         _urlTest = _configuration["Sifen:UrlTest"] ?? "https://sifen-test.set.gov.py/de/ws/sync";
         _urlProd = _configuration["Sifen:UrlProd"] ?? "https://sifen.set.gov.py/de/ws/sync";
+        _certificatePath = _configuration["Sifen:CertificatePath"] ?? "";
+        _certificatePassword = _configuration["Sifen:CertificatePassword"] ?? "";
     }
 
     public async Task<SifenResponse> RecibeAsync(
         string xmlDocumento,
         string ambiente,
-        string certificatePath,
-        string certificatePassword,
         CancellationToken cancellationToken = default)
     {
         try
@@ -49,7 +51,7 @@ public class SifenClient : ISifenClient
             var endpoint = $"{url}/recibe";
 
             // Configurar certificado cliente si es necesario
-            ConfigurarCertificadoCliente(certificatePath, certificatePassword);
+            ConfigurarCertificadoCliente(_certificatePath, _certificatePassword);
 
             // Crear SOAP envelope
             var soapEnvelope = CreateSoapEnvelope("rEnviDE", xmlDocumento);
@@ -87,8 +89,6 @@ public class SifenClient : ISifenClient
     public async Task<SifenResponse> RecibeLoteAsync(
         List<string> xmlDocumentos,
         string ambiente,
-        string certificatePath,
-        string certificatePassword,
         CancellationToken cancellationToken = default)
     {
         try
@@ -97,7 +97,7 @@ public class SifenClient : ISifenClient
             var endpoint = $"{url}/recibe-lote";
 
             // Configurar certificado cliente
-            ConfigurarCertificadoCliente(certificatePath, certificatePassword);
+            ConfigurarCertificadoCliente(_certificatePath, _certificatePassword);
 
             // Crear XML de lote
             var loteXml = CreateLoteXml(xmlDocumentos);
@@ -135,8 +135,6 @@ public class SifenClient : ISifenClient
     public async Task<SifenResponse> EventoAsync(
         string xmlEvento,
         string ambiente,
-        string certificatePath,
-        string certificatePassword,
         CancellationToken cancellationToken = default)
     {
         try
@@ -144,7 +142,7 @@ public class SifenClient : ISifenClient
             var url = ambiente == "prod" ? _urlProd : _urlTest;
             var endpoint = $"{url}/evento";
 
-            ConfigurarCertificadoCliente(certificatePath, certificatePassword);
+            ConfigurarCertificadoCliente(_certificatePath, _certificatePassword);
 
             var soapEnvelope = CreateSoapEnvelope("rEnviEventoDE", xmlEvento);
 
@@ -175,8 +173,6 @@ public class SifenClient : ISifenClient
     public async Task<SifenConsultaResponse> ConsultaAsync(
         string cdc,
         string ambiente,
-        string certificatePath,
-        string certificatePassword,
         CancellationToken cancellationToken = default)
     {
         try
@@ -184,7 +180,7 @@ public class SifenClient : ISifenClient
             var url = ambiente == "prod" ? _urlProd : _urlTest;
             var endpoint = $"{url}/consulta";
 
-            ConfigurarCertificadoCliente(certificatePath, certificatePassword);
+            ConfigurarCertificadoCliente(_certificatePath, _certificatePassword);
 
             // Crear XML de consulta
             var consultaXml = $@"<rEnviConsDe>
@@ -221,8 +217,6 @@ public class SifenClient : ISifenClient
     public async Task<SifenConsultaRucResponse> ConsultaRucAsync(
         string ruc,
         string ambiente,
-        string certificatePath,
-        string certificatePassword,
         CancellationToken cancellationToken = default)
     {
         try
@@ -230,7 +224,7 @@ public class SifenClient : ISifenClient
             var url = ambiente == "prod" ? _urlProd : _urlTest;
             var endpoint = $"{url}/consulta-ruc";
 
-            ConfigurarCertificadoCliente(certificatePath, certificatePassword);
+            ConfigurarCertificadoCliente(_certificatePath, _certificatePassword);
 
             // Crear XML de consulta RUC
             var consultaXml = $@"<rEnviConsRUC>
@@ -267,8 +261,6 @@ public class SifenClient : ISifenClient
     public async Task<SifenConsultaLoteResponse> ConsultaLoteAsync(
         string numeroLote,
         string ambiente,
-        string certificatePath,
-        string certificatePassword,
         CancellationToken cancellationToken = default)
     {
         try
@@ -276,7 +268,7 @@ public class SifenClient : ISifenClient
             var url = ambiente == "prod" ? _urlProd : _urlTest;
             var endpoint = $"{url}/consulta-lote";
 
-            ConfigurarCertificadoCliente(certificatePath, certificatePassword);
+            ConfigurarCertificadoCliente(_certificatePath, _certificatePassword);
 
             var consultaXml = $@"<rEnviConsLoteDe>
                 <dId>{Guid.NewGuid()}</dId>
