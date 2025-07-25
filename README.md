@@ -101,6 +101,84 @@ graph TB
     style P fill:#fff9c4
 ```
 
+## Configuración de Certificados Digitales para SIFEN
+
+La API requiere un certificado digital (PFX o PEM) para la autenticación mutua y la firma de mensajes al comunicarte con SIFEN. Hay dos formas principales de gestionar los certificados:
+
+### 1. Uso Directo por Parámetro
+
+Puedes pasar la ruta del archivo y la contraseña directamente en los métodos públicos de la clase `SifenClient`. Ejemplo:
+
+```csharp
+var response = await sifenClient.ConsultaAsync(
+    cdc,
+    ambiente,
+    "ruta/al/certificado.pfx",
+    "contraseñaCertificado"
+);
+```
+Esto es útil para desarrollo y pruebas rápidas.
+
+### 2. Almacenamiento Seguro en Base de Datos
+
+Para producción, se recomienda almacenar los certificados en la base de datos de forma segura usando la clase `CertificateManager`. De esta manera, el certificado y su contraseña quedan cifrados y asociados al contribuyente.
+
+#### Guardar un certificado
+
+```csharp
+await certificateManager.StoreCertificateAsync(
+    contribuyenteId,
+    File.ReadAllBytes("miCertificado.pfx"),
+    "miPassword"
+);
+```
+
+#### Obtener un certificado
+
+```csharp
+var cert = await certificateManager.GetCertificateAsync(contribuyenteId);
+```
+
+El sistema recupera automáticamente el certificado activo y vigente para cada operación con SIFEN.
+
+### 3. Recomendaciones de Seguridad
+
+- Usa solo certificados válidos y vigentes.
+- Realiza backups seguros de tus certificados.
+- Utiliza sistemas de vault/secreto para la gestión centralizada en ambientes productivos.
+
+### 4. Ejemplo de Configuración en Producción
+
+1. Almacena el certificado con `CertificateManager`.
+2. Invoca los métodos de Sifen pasando el `contribuyenteId` para que la API recupere y configure el certificado automáticamente.
+3. Verifica que los logs no expongan la contraseña o datos sensibles del certificado.
+
+---
+
+**Notas:**
+- Puedes usar archivos en formato `.pfx` (PKCS#12) o `.pem` según el tipo de certificado que tengas, ambos soportados por la API.
+- Si tienes dudas sobre la gestión de certificados, revisa la documentación técnica en `docs/sifen-security-architecture.md`.
+
+---
+
+### Diagrama de Flujo de Certificados
+
+```mermaid
+flowchart TD
+    A[Usuario] -->|PFX/PEM + Password| B[API Sifen]
+    B -->|Guarda Certificado| C[DB Certificados]
+    B -->|Consulta a SIFEN| D[SIFEN SET]
+    B -->|Recupera Certificado| C
+    C -->|Certificado Activo| B
+    B -->|Autenticación Mutual TLS| D
+    D -->|Respuesta| B
+
+    subgraph Seguridad
+        C
+    end
+```
+
+
 ### Patrones Utilizados
 
 - **Clean Architecture**: Separación clara de responsabilidades
