@@ -103,25 +103,42 @@ graph TB
 
 ## Configuración de Certificados Digitales para SIFEN
 
-La API requiere un certificado digital (PFX o PEM) para la autenticación mutua y la firma de mensajes al comunicarte con SIFEN. Hay dos formas principales de gestionar los certificados:
+La API requiere un certificado digital (PFX o PEM) para la autenticación mutua y la firma de mensajes al comunicarte con SIFEN. Los certificados se configuran a través de los archivos de configuración `appsettings.json`.
 
-### 1. Uso Directo por Parámetro
+### 1. Configuración en appsettings.json
 
-Puedes pasar la ruta del archivo y la contraseña directamente en los métodos públicos de la clase `SifenClient`. Ejemplo:
+Los paths de certificado y contraseñas se configuran en el archivo `appsettings.json` o `appsettings.{Environment}.json`:
+
+```json
+{
+  "Sifen": {
+    "BaseUrl": "https://sifen.set.gov.py",
+    "CertificatePath": "path/to/certificate.pfx",
+    "CertificatePassword": "your-certificate-password"
+  }
+}
+```
+
+Para diferentes ambientes (desarrollo, pruebas, producción), puedes tener configuraciones separadas:
+
+- `appsettings.Development.json` - Para desarrollo local
+- `appsettings.Staging.json` - Para ambiente de pruebas
+- `appsettings.Production.json` - Para producción
+
+### 2. Uso en el Código
+
+Los métodos de `SifenClient` ahora utilizan automáticamente la configuración del certificado desde `appsettings.json`:
 
 ```csharp
-var response = await sifenClient.ConsultaAsync(
-    cdc,
-    ambiente,
-    "ruta/al/certificado.pfx",
-    "contraseñaCertificado"
-);
+// El certificado se configura automáticamente desde appsettings.json
+var response = await sifenClient.ConsultaAsync(cdc, ambiente);
 ```
-Esto es útil para desarrollo y pruebas rápidas.
 
-### 2. Almacenamiento Seguro en Base de Datos
+No es necesario pasar los parámetros de certificado en cada llamada, ya que se toman de la configuración centralizada.
 
-Para producción, se recomienda almacenar los certificados en la base de datos de forma segura usando la clase `CertificateManager`. De esta manera, el certificado y su contraseña quedan cifrados y asociados al contribuyente.
+### 3. Almacenamiento Seguro en Base de Datos
+
+Para mayor seguridad en producción, puedes almacenar los certificados en la base de datos usando la clase `CertificateManager`:
 
 #### Guardar un certificado
 
@@ -139,25 +156,42 @@ await certificateManager.StoreCertificateAsync(
 var cert = await certificateManager.GetCertificateAsync(contribuyenteId);
 ```
 
-El sistema recupera automáticamente el certificado activo y vigente para cada operación con SIFEN.
+### 4. Recomendaciones de Seguridad
 
-### 3. Recomendaciones de Seguridad
+- **No hardcodees contraseñas**: Usa variables de entorno o Azure Key Vault para las contraseñas en producción
+- **Protege los archivos de configuración**: Asegúrate de que `appsettings.Production.json` no se suba al control de versiones
+- **Usa certificados válidos y vigentes**: Verifica las fechas de expiración regularmente
+- **Realiza backups seguros**: Mantén copias de seguridad de tus certificados en lugares seguros
 
-- Usa solo certificados válidos y vigentes.
-- Realiza backups seguros de tus certificados.
-- Utiliza sistemas de vault/secreto para la gestión centralizada en ambientes productivos.
+### 5. Ejemplo de Configuración con Variables de Entorno
 
-### 4. Ejemplo de Configuración en Producción
+Para mayor seguridad, puedes usar variables de entorno para sobrescribir valores sensibles:
 
-1. Almacena el certificado con `CertificateManager`.
-2. Invoca los métodos de Sifen pasando el `contribuyenteId` para que la API recupere y configure el certificado automáticamente.
-3. Verifica que los logs no expongan la contraseña o datos sensibles del certificado.
+```bash
+# Linux/macOS
+export Sifen__CertificatePassword="secure-password"
+
+# Windows
+set Sifen__CertificatePassword=secure-password
+```
+
+En tu `appsettings.json`:
+```json
+{
+  "Sifen": {
+    "BaseUrl": "https://sifen.set.gov.py",
+    "CertificatePath": "certificates/production.pfx",
+    "CertificatePassword": "" // Se sobrescribe con variable de entorno
+  }
+}
+```
 
 ---
 
 **Notas:**
-- Puedes usar archivos en formato `.pfx` (PKCS#12) o `.pem` según el tipo de certificado que tengas, ambos soportados por la API.
-- Si tienes dudas sobre la gestión de certificados, revisa la documentación técnica en `docs/sifen-security-architecture.md`.
+- Los certificados pueden ser en formato `.pfx` (PKCS#12) o `.pem`
+- Para gestión avanzada de certificados, revisa `docs/sifen-security-architecture.md`
+- En ambientes de contenedores, considera montar el certificado como volumen secreto
 
 ---
 
@@ -226,7 +260,8 @@ Crear archivo `appsettings.Development.json` con las configuraciones necesarias:
   },
   "Sifen": {
     "BaseUrl": "https://sifen.set.gov.py",
-    "CertificateThumbprint": "YOUR_CERTIFICATE_THUMBPRINT"
+    "CertificatePath": "path/to/certificate.pfx",
+    "CertificatePassword": "your-certificate-password"
   }
 }
 ```
